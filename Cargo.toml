@@ -1,0 +1,14 @@
+[package]
+name = "nspectre"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "nspectre"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3-asyncio = { version = "0.20", features = ["tokio-runtime"] }
+pyo3 = { version = "0.20", features = ["extension-module"] }
+tokio = { version = "1.47.1", features = ["full"] }
