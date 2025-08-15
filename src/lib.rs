@@ -1,11 +1,23 @@
 use pyo3::prelude::*;
-use tokio::{net::TcpStream, runtime::Builder};
+use std::fmt;
+use tokio::{
+    net::TcpStream,
+    runtime::Builder,
+    time::{timeout, Duration},
+};
 
 #[pyclass(get_all, set_all)]
 #[derive(Debug)]
 struct Port {
     pub port: u16,
     pub status: PortStatus,
+}
+
+#[pymethods]
+impl Port {
+    fn __repr__(&self) -> String {
+        format!("Port: {} - Status: {}", self.port, self.status)
+    }
 }
 
 #[pyclass(get_all, set_all)]
@@ -16,11 +28,33 @@ enum PortStatus {
     Filtered,
 }
 
+#[pymethods]
+impl PortStatus {
+    fn __repr__(&self) -> String {
+        match self {
+            PortStatus::Open => format!("open"),
+            PortStatus::Closed => format!("closed"),
+            PortStatus::Filtered => format!("filtered"),
+        }
+    }
+}
+
+impl fmt::Display for PortStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            PortStatus::Open => write!(f, "open"),
+            PortStatus::Closed => write!(f, "closed"),
+            PortStatus::Filtered => write!(f, "filtered"),
+        }
+    }
+}
+
 async fn scan_port(host: &str, port: u16) -> Port {
     let socket_addr = format!("{host}:{port}");
-    let status = match TcpStream::connect(&socket_addr).await {
-        Ok(_) => PortStatus::Open,
-        Err(_) => PortStatus::Closed,
+    let status = match timeout(Duration::from_secs(2), TcpStream::connect(&socket_addr)).await {
+        Ok(Ok(_)) => PortStatus::Open,
+        Ok(Err(_)) => PortStatus::Closed,
+        Err(_) => PortStatus::Filtered,
     };
 
     Port { port, status }
@@ -36,8 +70,9 @@ fn py_scan_port<'p>(py: Python<'p>, host: String, port: u16) -> PyResult<&'p PyA
 
 #[pymodule]
 fn nspectre(_py: Python, m: &PyModule) -> PyResult<()> {
+    pyo3::prepare_freethreaded_python();
     let mut builder = Builder::new_multi_thread();
-    builder.enable_io();
+    builder.enable_all();
     let builder = builder;
     pyo3_asyncio::tokio::init(builder);
     m.add_function(wrap_pyfunction!(py_scan_port, m)?)?;
