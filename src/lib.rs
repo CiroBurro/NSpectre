@@ -32,9 +32,9 @@ enum PortStatus {
 impl PortStatus {
     fn __repr__(&self) -> String {
         match self {
-            PortStatus::Open => format!("open"),
-            PortStatus::Closed => format!("closed"),
-            PortStatus::Filtered => format!("filtered"),
+            PortStatus::Open => String::from("Open"),
+            PortStatus::Closed => String::from("Closed"),
+            PortStatus::Filtered => String::from("Filtered"),
         }
     }
 }
@@ -75,6 +75,8 @@ fn nspectre(_py: Python, m: &PyModule) -> PyResult<()> {
     builder.enable_all();
     let builder = builder;
     pyo3_asyncio::tokio::init(builder);
+    
+    
     m.add_function(wrap_pyfunction!(py_scan_port, m)?)?;
     m.add_class::<Port>()?;
     m.add_class::<PortStatus>()?;
