@@ -1,5 +1,5 @@
 import argparse
-from utils.common_ports import MOST_COMMON_PORTS
+from .common_ports import MOST_COMMON_PORTS
 
 parser = argparse.ArgumentParser(
     prog="NSpectre",

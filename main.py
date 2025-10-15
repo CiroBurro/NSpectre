@@ -5,7 +5,7 @@ import asyncio
 
 async def _scan_wrapper(host: str, port: int):
     try:
-        return py_scan_port(host, port)
+        return await py_scan_port(host, port)
     except Exception as e:
         return e
 
