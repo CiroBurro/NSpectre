@@ -1,6 +1,6 @@
 from nspectre import py_scan_port, PortStatus 
 from utils import *
-import asyncio
+import asyncio, time
 
 
 async def _scan_wrapper(host: str, port: int):
@@ -9,8 +9,20 @@ async def _scan_wrapper(host: str, port: int):
     except Exception as e:
         return e
 
-async def main():
+def print_ports(results, single_port):
 
+    for res in results:
+        port = res.result()
+
+        if single_port:
+            print(f"{port}")
+        else:
+            if port.status==PortStatus.Open or port.status==PortStatus.Filtered:
+                print(f"{port}")
+
+
+async def main():
+    start = time.time()
     single_port = False
 
     arg = parser.parse_args()
@@ -24,14 +36,10 @@ async def main():
             t = tg.create_task(_scan_wrapper(host, port))
             results.append(t)
 
-    for res in results:
-        port = res.result()
 
-        if single_port:
-            print(f"{port}")
-        else:
-            if port.status==PortStatus.Open or port.status==PortStatus.Filtered:
-                print(f"{port}")
+    print_ports(results, single_port)
 
+    end = time.time()
+    print(f"Scan lasted {round(end -start, 2)} seconds")
 
 asyncio.run(main())
