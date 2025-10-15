@@ -1,5 +1,5 @@
 from nspectre import py_scan_port, PortStatus 
-from common_ports import MOST_COMMON_PORTS
+from utils.common_ports import MOST_COMMON_PORTS
 import asyncio, argparse
 
 
