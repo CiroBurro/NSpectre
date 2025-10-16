@@ -27,7 +27,6 @@ def ports_selection(args, single_port):
             i = int(range_ends[0])
             end = int(range_ends[1])
 
-
             while i < end:
                 ports.append(i)
                 i+=1

@@ -6,6 +6,12 @@ use tokio::{
     time::{timeout, Duration},
 };
 
+/// Port Structure
+/// Represents a socket port
+///
+/// Fields:
+/// - port: actual number of the port
+/// - status: status of the port (open, closed or filtered)
 #[pyclass(get_all, set_all)]
 #[derive(Debug)]
 struct Port {
@@ -15,11 +21,19 @@ struct Port {
 
 #[pymethods]
 impl Port {
+    /// Representing method for Port
     fn __repr__(&self) -> String {
         format!("Port: {} - Status: {}", self.port, self.status)
     }
 }
 
+/// PortStatus Enum
+/// Represents the status of a port
+///
+/// Variants:
+/// - Open: the port is open
+/// - Closed: the port is closed
+/// - Filtered: the port is filtered
 #[pyclass(get_all, set_all)]
 #[derive(Debug, Clone)]
 enum PortStatus {
@@ -30,6 +44,7 @@ enum PortStatus {
 
 #[pymethods]
 impl PortStatus {
+    /// Representing method for PortStatus
     fn __repr__(&self) -> String {
         match self {
             PortStatus::Open => String::from("Open"),
@@ -39,6 +54,7 @@ impl PortStatus {
     }
 }
 
+// Display trait implementation for PortStatus
 impl fmt::Display for PortStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -49,6 +65,14 @@ impl fmt::Display for PortStatus {
     }
 }
 
+/// Scan port function
+/// Checks the status of the given port of the given host
+///
+/// Args:
+/// - host: ip address of the host to scan
+/// - port: port to scan
+///
+/// Returns: port scanned
 async fn scan_port(host: &str, port: u16) -> Port {
     let socket_addr = format!("{host}:{port}");
     let status = match timeout(Duration::from_secs(2), TcpStream::connect(&socket_addr)).await {
@@ -60,6 +84,14 @@ async fn scan_port(host: &str, port: u16) -> Port {
     Port { port, status }
 }
 
+/// Py scan port function
+/// Scan port function wrapper for asyncio in python
+///
+/// Args:
+/// - host: ip address of the host to scan
+/// - port: port to scan
+///
+/// Returns: port scanned within a result wrapper
 #[pyfunction]
 fn py_scan_port<'p>(py: Python<'p>, host: String, port: u16) -> PyResult<&'p PyAny> {
     pyo3_asyncio::tokio::future_into_py(py, async move {
@@ -68,6 +100,9 @@ fn py_scan_port<'p>(py: Python<'p>, host: String, port: u16) -> PyResult<&'p PyA
     })
 }
 
+
+/// Nspectre python module
+/// Initializes the tokio async runtime and adds py_scan_port function, Port struct and PortStatus enum to the module
 #[pymodule]
 fn nspectre(_py: Python, m: &PyModule) -> PyResult<()> {
     pyo3::prepare_freethreaded_python();
