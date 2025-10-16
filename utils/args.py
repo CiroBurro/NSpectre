@@ -1,6 +1,7 @@
 import argparse
 from .common_ports import MOST_COMMON_PORTS
 
+# Parser config for cli args
 parser = argparse.ArgumentParser(
     prog="NSpectre",
     description="Simple port scanner",
@@ -11,6 +12,12 @@ parser.add_argument('-p', '--ports',
                     help='Specify the port to scan')
 
 def ports_selection(args, single_port):
+    """
+    Ports selection: if no port or ports range is specified the program scans the most common ports
+    :param args: parsed cli arguments
+    :param single_port: single_port flag specifies if only a single port was scanned
+    :return: list of ports to scan
+    """
     ports = []
 
     if args.ports is not None:
